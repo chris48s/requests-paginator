@@ -1,0 +1,15 @@
+# python cache files
+__pycache__/
+*.pyc
+
+# build artifacts
+build/
+dist/
+json_paginator.egg-info/
+
+# pipenv
+Pipfile
+Pipfile.lock
+
+# test coverage
+.coverage
