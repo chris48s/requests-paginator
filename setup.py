@@ -10,15 +10,15 @@ def _get_description():
         return ''
 
 setup(
-    name='json-paginator',
-    version='0.1.0',
+    name='requests-paginator',
+    version='0.2.0',
     author="chris48s",
     license="MIT",
-    description='A generator for iterating over paginated JSON API responses',
+    description='A generator for iterating over paginated API responses',
     long_description=_get_description(),
     long_description_content_type="text/markdown",
-    url="https://github.com/chris48s/json-paginator",
-    packages=['json_paginator'],
+    url="https://github.com/chris48s/requests-paginator",
+    packages=['requests_paginator'],
     install_requires=['requests'],
     classifiers=[
         'License :: OSI Approved :: MIT License',

@@ -1,43 +1,75 @@
-# json-paginator
+# requests-paginator
 
-![PyPI Version](https://img.shields.io/pypi/v/json-paginator.svg)
-![License](https://img.shields.io/pypi/l/json-paginator.svg)
+![PyPI Version](https://img.shields.io/pypi/v/requests-paginator.svg)
+![License](https://img.shields.io/pypi/l/requests-paginator.svg)
 
-A generator for iterating over paginated JSON API responses
+A generator for iterating over paginated API responses
 
 ## Installation
 
 ```
-pip install json-paginator
+pip install requests-paginator
 ```
 
 ## Usage
 
-Instantiate `JsonApiPaginator` with:
+Instantiate `RequestsPaginator` with:
 
 * A URL to page 1 of the API output
-* A function (or lambda) `get_nextpage(url, body)` which describes how to get the next page. Return `None` to stop iteration.
+* A function (or lambda) `get_nextpage(page)` which describes how to get the next page:
+    * Return `None` to stop iteration.
+    * `page` is an instance of [`requests.models.Response`](http://docs.python-requests.org/en/master/user/quickstart/#response-content)
 
-Example:
+Examples:
 
 ```py
-from json_paginator import JsonApiPaginator
+from requests_paginator import RequestsPaginator
 
 BASE = 'https://galaxy.ansible.com'
 
-def get_next_page(url, body):
+def get_next_page(page):
+    body = page.json()
     if body['next_link']:
         return BASE +  body['next_link']
     return None
 
 # instantiate the paginator
-pages = JsonApiPaginator(
+pages = RequestsPaginator(
     BASE + '/api/v1/categories/?page=1',
     get_next_page
 )
 
 # iterate over the pages
-for url, body in pages:
-    print("calling %s" % (url))
-    print("found %s results" % (len(body['results'])))
+for page in pages:
+    print("calling %s" % (page.url))
+    page.raise_for_status()
+    print("found %s results" % (len(page.json()['results'])))
+```
+
+```py
+from requests_paginator import RequestsPaginator
+
+def get_next_page(page):
+    links = {}
+    if "Link" in page.headers:
+        linkHeaders = page.headers["Link"].split(", ")
+        for linkHeader in linkHeaders:
+            (url, rel) = linkHeader.split("; ")
+            url = url[1:-1]
+            rel = rel[5:-1]
+            if rel == 'next':
+                return url
+    return None
+
+# instantiate the paginator
+pages = RequestsPaginator(
+    'https://api.github.com/users/github/repos?page=1',
+    get_next_page
+)
+
+# iterate over the pages
+for page in pages:
+    print("calling %s" % (page.url))
+    page.raise_for_status()
+    print("found %s results" % (len(page.json())))
 ```
